@@ -20,8 +20,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import train_test_split
 
-PROCESSED_PATH = Path("data/processed/news_processed.parquet")
-MODEL_DIR = Path("models")
+PROCESSED_PATH = Path("../data/processed/news_processed.parquet")
+MODEL_DIR = Path("../models")
 EXPERIMENT_NAME = "fake-news-classification"
 
 
@@ -44,6 +44,7 @@ def train_model(
     )
 
     mlflow.set_experiment(EXPERIMENT_NAME)
+    mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
     with mlflow.start_run():
         # --- Parámetros ---

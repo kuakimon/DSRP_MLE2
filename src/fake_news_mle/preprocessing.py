@@ -22,8 +22,8 @@ PROCESSED_DIR = Path("data/processed")
 
 def load_raw_data(raw_dir: Path = RAW_DIR) -> pd.DataFrame:
     """Carga Fake.csv y True.csv, los etiqueta y los combina en un solo DataFrame."""
-    fake_df = pd.read_csv(raw_dir / "Fake.csv")
-    true_df = pd.read_csv(raw_dir / "True.csv")
+    fake_df = pd.read_csv(raw_dir+"/Fake.csv")
+    true_df = pd.read_csv(raw_dir+"/True.csv")
 
     fake_df["label"] = 0  # 0 = fake
     true_df["label"] = 1  # 1 = real
@@ -59,10 +59,10 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
 def preprocess(raw_dir: Path = RAW_DIR, processed_dir: Path = PROCESSED_DIR) -> pd.DataFrame:
     """Pipeline completo: cargar -> limpiar -> guardar dataset procesado."""
-    processed_dir.mkdir(parents=True, exist_ok=True)
+    Path(processed_dir).mkdir(parents=True, exist_ok=True)
     df = load_raw_data(raw_dir)
     df = build_features(df)
-    output_path = processed_dir / "news_processed.parquet"
+    output_path = Path(processed_dir) / "news_processed.parquet"
     df.to_parquet(output_path, index=False)
     print(f"Dataset procesado guardado en: {output_path} ({len(df)} filas)")
     return df
