@@ -43,8 +43,8 @@ def train_model(
         random_state=random_state, stratify=df["label"],
     )
 
-    mlflow.set_experiment(EXPERIMENT_NAME)
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_experiment(EXPERIMENT_NAME)
 
     with mlflow.start_run():
         # --- Parámetros ---

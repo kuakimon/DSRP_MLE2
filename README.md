@@ -53,7 +53,20 @@ Referencia: https://www.kaggle.com/code/var0101/model-cards
 
 ## e. Resultados — métricas de evaluación offline y online
 **Offline** (ver experimentos completos en MLflow, link a agregar tras publicar):
-- Accuracy, Precision, Recall, F1-score, ROC-AUC — completar con los valores del mejor run.
+
+| Métrica | Valor (test) |
+|---|---|
+| Accuracy | 0.9909 |
+| Precision | 0.9879 |
+| Recall | 0.9930 |
+| F1-score | 0.9905 |
+| ROC-AUC | 0.9991 |
+
+Estos valores son excelentes y, para este dataset en particular, esperables:
+el modelo probablemente está aprendiendo diferencias de *estilo/formato*
+entre las fuentes usadas para armar Fake.csv y True.csv (agencias de noticias
+reales vs. sitios de fake news), más que "entender" el contenido. Vale la
+pena mencionarlo en las conclusiones y en las limitaciones del Model Card.
 
 **Online** (registradas automáticamente por `streamlit_app/metrics.py` en cada interacción, visibles en la barra lateral de la app y en `data/logs/interactions.jsonl`):
 

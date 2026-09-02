@@ -13,6 +13,7 @@ Ejecutar:
 import asyncio
 import sys
 import time
+import traceback
 from pathlib import Path
 
 import streamlit as st
@@ -33,6 +34,17 @@ SYSTEM_PROMPT = (
     "datos reales del dataset o del modelo en vez de inventar información. "
     "Responde en español, de forma clara y concisa."
 )
+
+
+def _unwrap_exception(exc: BaseException) -> BaseException:
+    """anyio/asyncio envuelven errores dentro de ExceptionGroup ('unhandled
+    errors in a TaskGroup'). Esta función baja hasta la excepción real para
+    poder mostrar un mensaje útil en vez de un envoltorio genérico.
+    """
+    seen = exc
+    while hasattr(seen, "exceptions") and seen.exceptions:  # ExceptionGroup / BaseExceptionGroup
+        seen = seen.exceptions[0]
+    return seen
 
 
 def mcp_tools_to_anthropic_format(mcp_tools) -> list:
@@ -162,7 +174,19 @@ def main():
                     )
                     success = True
                 except Exception as exc:  # noqa: BLE001
-                    result = {"answer": f"Ocurrió un error: {exc}", "tools_used": [], "tool_errors": 1}
+                    # Imprime el traceback completo en la terminal donde corre
+                    # streamlit (ahí sí verás la causa real del error).
+                    traceback.print_exc()
+                    real_cause = _unwrap_exception(exc)
+                    result = {
+                        "answer": (
+                            f"Ocurrió un error: **{type(real_cause).__name__}**: {real_cause}\n\n"
+                            "Revisa la terminal donde corriste `streamlit run` para ver el "
+                            "traceback completo."
+                        ),
+                        "tools_used": [],
+                        "tool_errors": 1,
+                    }
                     success = False
                 latency = time.time() - start
                 st.markdown(result["answer"])
