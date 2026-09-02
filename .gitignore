@@ -1,0 +1,31 @@
+# Datos y modelos (pesan mucho, no van al repo)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+data/logs/*
+!data/logs/.gitkeep
+
+# MLflow
+mlruns/*
+!mlruns/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+
+# Entorno / secretos
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+
+# SO / editor
+.DS_Store
+.vscode/

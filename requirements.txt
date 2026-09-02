@@ -1,0 +1,9 @@
+pandas
+scikit-learn
+joblib
+pyarrow
+mlflow
+streamlit
+anthropic
+mcp[cli]
+jupyter
