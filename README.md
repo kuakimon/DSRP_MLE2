@@ -16,22 +16,22 @@ política?" o "clasifica este titular: ...").
 data/raw (Fake.csv, True.csv)
         │
         ▼
-notebooks/01\_preprocesamiento.ipynb ── src/fake\_news\_mle/preprocessing.py
+notebooks/01\\\_preprocesamiento.ipynb ── src/fake\\\_news\\\_mle/preprocessing.py
         │
         ▼
-data/processed/news\_processed.parquet
+data/processed/news\\\_processed.parquet
         │
         ▼
-notebooks/02\_machine\_learning.ipynb ── src/fake\_news\_mle/train.py ──► MLflow
+notebooks/02\\\_machine\\\_learning.ipynb ── src/fake\\\_news\\\_mle/train.py ──► MLflow
         │                                                          (params, metrics, artifacts)
         ▼
 models/model.joblib + models/vectorizer.joblib  (modelo productivo)
         │
         ▼
-mcp\_server/server.py  (tools: classify\_news, dataset\_stats, search\_examples)
+mcp\\\_server/server.py  (tools: classify\\\_news, dataset\\\_stats, search\\\_examples)
         │
         ▼
-streamlit\_app/app.py  (agente Claude + tool use sobre el MCP)  ◄── usuario final
+streamlit\\\_app/app.py  (agente Claude + tool use sobre el MCP)  ◄── usuario final
 ```
 
 \[Reemplazar por una imagen del diagrama si se desea.]
@@ -49,11 +49,11 @@ Dos archivos CSV: `Fake.csv` (23,502 artículos) y `True.csv` (21,417 artículos
 |`date`|fecha|Fecha de publicación|
 |`label`|binario|0 = fake, 1 = real (agregado en preprocesamiento)|
 
-Columnas derivadas en preprocesamiento: `clean\_text` (texto limpio), `text\_length` (longitud en palabras).
+Columnas derivadas en preprocesamiento: `clean\\\_text` (texto limpio), `text\\\_length` (longitud en palabras).
 
 ## d. Model Card
 
-Ver [`docs/model\_card\_template.md`](docs/model_card_template.md) — completar con las métricas finales tras entrenar.
+Ver [`docs/model\\\_card\\\_template.md`](docs/model_card_template.md) — completar con las métricas finales tras entrenar.
 Referencia: https://www.kaggle.com/code/var0101/model-cards
 
 ## e. Resultados — métricas de evaluación offline y online
@@ -74,7 +74,7 @@ entre las fuentes usadas para armar Fake.csv y True.csv (agencias de noticias
 reales vs. sitios de fake news), más que "entender" el contenido. Vale la
 pena mencionarlo en las conclusiones y en las limitaciones del Model Card.
 
-**Online** (registradas automáticamente por `streamlit\_app/metrics.py` en cada interacción, visibles en la barra lateral de la app y en `data/logs/interactions.jsonl`):
+**Online** (registradas automáticamente por `streamlit\\\_app/metrics.py` en cada interacción, visibles en la barra lateral de la app y en `data/logs/interactions.jsonl`):
 
 |Métrica online|Qué mide|Valor observado|
 |-|-|-|
@@ -100,15 +100,15 @@ Se logró levantar el agente y la conexión exitosa con la key de anthropic, per
 
 ```
 ├── notebooks/
-│   ├── 01\_preprocesamiento.ipynb
-│   └── 02\_machine\_learning.ipynb
+│   ├── 01\\\_preprocesamiento.ipynb
+│   └── 02\\\_machine\\\_learning.ipynb
 ├── data/
 │   ├── raw/            # Fake.csv, True.csv (no versionados, ver .gitignore)
 │   └── processed/      # dataset limpio en parquet
-├── src/fake\_news\_mle/  # módulo reusable (preprocessing, train, predict)
-├── scripts/            # run\_preprocessing.py, run\_training.py, run\_prediction.py
-├── mcp\_server/         # servidor MCP con tools sobre dataset y modelo
-├── streamlit\_app/      # app con el agente conversacional
+├── src/fake\\\_news\\\_mle/  # módulo reusable (preprocessing, train, predict)
+├── scripts/            # run\\\_preprocessing.py, run\\\_training.py, run\\\_prediction.py
+├── mcp\\\_server/         # servidor MCP con tools sobre dataset y modelo
+├── streamlit\\\_app/      # app con el agente conversacional
 ├── models/             # modelo y vectorizador entrenados (no versionados)
 ├── docs/                # estrategia de git y model card
 └── mlruns/              # tracking local de MLflow (no versionado)
@@ -123,18 +123,18 @@ pip install -r requirements.txt
 # 2. Colocar Fake.csv y True.csv en data/raw/
 
 # 3. Preprocesar datos
-python scripts/run\_preprocessing.py
+python scripts/run\\\_preprocessing.py
 
 # 4. Entrenar y trackear en MLflow
-python scripts/run\_training.py
+python scripts/run\\\_training.py
 mlflow ui   # http://localhost:5000
 
 # 5. Probar una predicción rápida
-python scripts/run\_prediction.py "titular de ejemplo a clasificar"
+python scripts/run\\\_prediction.py "titular de ejemplo a clasificar"
 
 # 6. Levantar el agente con Streamlit (usa el servidor MCP internamente)
-export ANTHROPIC\_API\_KEY=sk-...
-streamlit run streamlit\_app/app.py
+export ANTHROPIC\\\_API\\\_KEY=sk-...
+streamlit run streamlit\\\_app/app.py
 ```
 
 ## Experimentos en MLflow
@@ -143,7 +143,7 @@ Link con evidencia de experimentos y modelo productivo: **\[agregar link tras pu
 
 ## Estrategia de Git
 
-Ver [`docs/git\_strategy.md`](docs/git_strategy.md).
+Ver [`docs/git\\\_strategy.md`](docs/git_strategy.md).
 
 ## Versión
 
