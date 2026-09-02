@@ -21,6 +21,13 @@ from anthropic import Anthropic
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+# En Windows, Streamlit (vía Tornado) fuerza el SelectorEventLoop, que NO
+# soporta subprocesos — necesarios para que el cliente MCP levante el
+# servidor. Forzamos el ProactorEventLoop explícitamente para evitar que
+# la app se quede "colgada" indefinidamente al llamar al agente.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 sys.path.append(str(Path(__file__).resolve().parent))
 import metrics  # noqa: E402
 
@@ -65,20 +72,28 @@ async def run_agent_turn(user_message: str, history: list) -> dict:
     usadas y errores de tool-calls).
     """
     client = Anthropic()  # usa ANTHROPIC_API_KEY del entorno
-    server_params = StdioServerParameters(command=sys.executable, args=[str(SERVER_SCRIPT)])
+    server_params = StdioServerParameters(
+        command=sys.executable,
+        args=["-u", str(SERVER_SCRIPT)],  # -u: salida sin buffer, evita cuelgues en Windows
+    )
 
     tools_used = []
     tool_errors = 0
 
     async with stdio_client(server_params) as (read, write):
+        print("[agente] conectado al subproceso MCP", flush=True)
         async with ClientSession(read, write) as session:
+            print("[agente] sesión MCP creada, inicializando...", flush=True)
             await session.initialize()
+            print("[agente] sesión MCP inicializada, listando tools...", flush=True)
             mcp_tools = (await session.list_tools()).tools
+            print(f"[agente] tools disponibles: {[t.name for t in mcp_tools]}", flush=True)
             anthropic_tools = mcp_tools_to_anthropic_format(mcp_tools)
 
             messages = history + [{"role": "user", "content": user_message}]
 
             while True:
+                print("[agente] llamando a client.messages.create()...", flush=True)
                 response = client.messages.create(
                     model=MODEL_NAME,
                     max_tokens=1024,
@@ -86,6 +101,7 @@ async def run_agent_turn(user_message: str, history: list) -> dict:
                     tools=anthropic_tools,
                     messages=messages,
                 )
+                print(f"[agente] respuesta recibida, stop_reason={response.stop_reason}", flush=True)
 
                 # Si Claude no pide usar ninguna tool, esa es la respuesta final.
                 if response.stop_reason != "tool_use":
@@ -104,12 +120,15 @@ async def run_agent_turn(user_message: str, history: list) -> dict:
                 for block in response.content:
                     if block.type == "tool_use":
                         tools_used.append(block.name)
+                        print(f"[agente] ejecutando tool: {block.name}({block.input})", flush=True)
                         try:
                             result = await session.call_tool(block.name, block.input)
+                            print(f"[agente] tool {block.name} respondió OK", flush=True)
                             result_text = "".join(
                                 c.text for c in result.content if hasattr(c, "text")
                             )
                         except Exception as exc:  # noqa: BLE001
+                            print(f"[agente] tool {block.name} falló: {exc}", flush=True)
                             tool_errors += 1
                             result_text = f"Error al ejecutar la tool: {exc}"
                         tool_results.append(
@@ -170,9 +189,22 @@ def main():
                 start = time.time()
                 try:
                     result = asyncio.run(
-                        run_agent_turn(user_input, st.session_state.agent_history)
+                        asyncio.wait_for(
+                            run_agent_turn(user_input, st.session_state.agent_history),
+                            timeout=300,
+                        )
                     )
                     success = True
+                except asyncio.TimeoutError:
+                    result = {
+                        "answer": (
+                            "El agente tardó más de 300s y se canceló. Revisa la "
+                            "terminal por si el servidor MCP quedó colgado."
+                        ),
+                        "tools_used": [],
+                        "tool_errors": 1,
+                    }
+                    success = False
                 except Exception as exc:  # noqa: BLE001
                     # Imprime el traceback completo en la terminal donde corre
                     # streamlit (ahí sí verás la causa real del error).
